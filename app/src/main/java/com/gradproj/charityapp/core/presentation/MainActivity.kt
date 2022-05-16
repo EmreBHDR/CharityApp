@@ -56,18 +56,6 @@ class MainActivity : ComponentActivity() {
                     val spacing = LocalSpacing.current
                     val localSize = LocalSize.current
 
-                    val context = LocalContext.current
-                    RequireLocationPermission(navigateToSettingsScreen = {
-                        context.startActivity(
-                            Intent(
-                                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                                Uri.fromParts("package", context.packageName, null)
-                            )
-                        )
-                    }) {
-                        Text("Location Permission Accessible")
-                    }
-
                     window.statusBarColor = ContextCompat.getColor(
                         this,
                         if (isSystemInDarkTheme()) R.color.background_dark else R.color.background_light
@@ -137,7 +125,19 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     ) {
-                        Navigation(navController, scaffoldState)
+                        val context = LocalContext.current
+                        RequireLocationPermission(navigateToSettingsScreen = {
+                            context.startActivity(
+                                Intent(
+                                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    Uri.fromParts("package", context.packageName, null)
+                                )
+                            )
+                        }) {
+                            getLocationPermission()
+
+                            Navigation(navController, scaffoldState)
+                        }
                     }
                 }
             }
@@ -148,14 +148,11 @@ class MainActivity : ComponentActivity() {
         it == Screen.MapScreen.route || it == Screen.ListScreen.route || it == Screen.SettingsScreen.route
     } ?: false
 
-    private fun getLocationPermission(permissionState: MultiplePermissionsState) {
+    private fun getLocationPermission() {
         if (ContextCompat.checkSelfPermission(this.applicationContext, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
         {
             viewModel.permissionGrand(true)
             getDeviceLocation()
-
-        }else{
-
         }
     }
 
